@@ -29,10 +29,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    console.log("Instagram webhook event received:", {
-      receivedAt: new Date().toISOString(),
-      body,
-    });
+    console.log(
+      "Instagram webhook event received:",
+      JSON.stringify(
+        {
+          receivedAt: new Date().toISOString(),
+          body,
+        },
+        null,
+        2,
+      ),
+    );
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
