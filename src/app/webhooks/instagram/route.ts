@@ -50,10 +50,7 @@ export async function POST(request: NextRequest) {
     console.log(
       "Instagram webhook event received:",
       JSON.stringify(
-        {
-          receivedAt: new Date().toISOString(),
-          body,
-        },
+        summarizeInstagramWebhook(body),
         null,
         2,
       ),
@@ -81,6 +78,68 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     );
   }
+}
+
+function summarizeInstagramWebhook(body: unknown) {
+  const payload = asInstagramWebhookPayload(body);
+  const eventTypes = new Map<string, number>();
+  let messagingEvents = 0;
+
+  for (const entry of payload.entry ?? []) {
+    for (const event of entry.messaging ?? []) {
+      messagingEvents += 1;
+
+      if (event.message?.is_echo) {
+        increment(eventTypes, "echo");
+      } else if (event.message?.text) {
+        increment(eventTypes, "text");
+      } else if (event.read) {
+        increment(eventTypes, "read");
+      } else if (event.delivery) {
+        increment(eventTypes, "delivery");
+      } else {
+        increment(eventTypes, "unknown");
+      }
+    }
+  }
+
+  return {
+    receivedAt: new Date().toISOString(),
+    object: payload.object,
+    entries: payload.entry?.length ?? 0,
+    messagingEvents,
+    eventTypes: Object.fromEntries(eventTypes),
+  };
+}
+
+function increment(map: Map<string, number>, key: string) {
+  map.set(key, (map.get(key) ?? 0) + 1);
+}
+
+function asInstagramWebhookPayload(body: unknown): {
+  object?: unknown;
+  entry?: Array<{
+    messaging?: Array<{
+      message?: { text?: unknown; is_echo?: unknown };
+      read?: unknown;
+      delivery?: unknown;
+    }>;
+  }>;
+} {
+  if (!body || typeof body !== "object") {
+    return {};
+  }
+
+  return body as {
+    object?: unknown;
+    entry?: Array<{
+      messaging?: Array<{
+        message?: { text?: unknown; is_echo?: unknown };
+        read?: unknown;
+        delivery?: unknown;
+      }>;
+    }>;
+  };
 }
 
 async function processInstagramMessage(
