@@ -7,7 +7,7 @@ type GenerateReplyInput = {
   chunks: RagChunk[];
 };
 
-const DEFAULT_GROQ_MODEL = "llama-3.1-70b-versatile";
+const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
 
 let groqClient: Groq | undefined;
 
