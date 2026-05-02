@@ -6,6 +6,7 @@ import { sendInstagramMessage } from "@/lib/instagram/sendMessage";
 import { searchRelevantChunks } from "@/lib/rag/searchRelevantChunks";
 
 const VERIFY_TOKEN = process.env.META_WEBHOOK_VERIFY_TOKEN;
+const AI_REPLY_PREFIX = "Это сообщение от ИИ";
 
 export const runtime = "nodejs";
 
@@ -185,6 +186,6 @@ async function processInstagramMessage(
 
   await sendInstagramMessage({
     recipientId: message.senderId,
-    text: aiReply,
+    text: `${AI_REPLY_PREFIX}\n\n${aiReply}`,
   });
 }
