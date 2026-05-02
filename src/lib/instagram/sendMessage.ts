@@ -4,6 +4,7 @@ type SendInstagramMessageInput = {
 };
 
 const GRAPH_API_VERSION = "v23.0";
+const GRAPH_API_BASE_URL = "https://graph.instagram.com";
 
 export async function sendInstagramMessage({
   recipientId,
@@ -23,17 +24,17 @@ export async function sendInstagramMessage({
     throw new Error("META_ACCESS_TOKEN is not configured");
   }
 
-  const response = await fetch(
-    `https://graph.facebook.com/${GRAPH_API_VERSION}/me/messages?access_token=${accessToken}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        recipient: { id: recipientId },
-        message: { text },
-      }),
+  const response = await fetch(`${GRAPH_API_BASE_URL}/${GRAPH_API_VERSION}/me/messages`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text },
+    }),
+  });
 
   if (!response.ok) {
     const responseBody = await response.text();
